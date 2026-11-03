@@ -37,8 +37,7 @@ put jcl/TCATBALF.jcl
 !echo "Job 9: Refresh Transaction Type File "
 put jcl/TRANTYPE.jcl
 
-!echo "Job 11: Refresh User Security  File "
-put jcl/DUSRSECJ.jcl
+!echo "User Security file is not refreshed (DUSRSECJ is first load only)"
 
 !echo "Data Refresh Complete" && sleep 5
 !echo "-------------------------------------------------"

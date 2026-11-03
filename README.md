@@ -200,8 +200,9 @@ CardDemo includes several optional modules that extend the base functionality:
 
 ### Accessing the Application
 - **Online Functions**: Start the CardDemo application using the CC00 transaction
-  - Admin access: Use userid ADMIN001 with password PASSWORD
-  - User access: Use userid USER0001 with password PASSWORD
+  - Admin access: Use userid ADMIN001 with the initial password printed in the DUSRSECJ job's SYSOUT
+  - User access: Use userid USER0001 with the initial password printed in the DUSRSECJ job's SYSOUT
+  - DUSRSECJ (program CBSEC01C) gives every user a new random password each time it runs; no passwords are stored in the repository. Change them after first sign-on with the Update User function (CU02)
 - **Batch Functions**: See the "Running Batch Jobs" section below
 
 ## Running Batch Jobs
@@ -221,7 +222,7 @@ Execute the following JCLs in sequence to run the full batch process:
 | TRANTYPE | Copies latest transaction type file to VSAM         |                 |
 | DISCGRP  | Copies initial disclosure Group file to VSAM        |                 |
 | TCATBALF | Copies initial TCATBALF file to VSAM                |                 |
-| DUSRSECJ | Sets up user security VSAM file                     |                 |
+| DUSRSECJ | Sets up user security VSAM file (first load only; rerunning it replaces every user and password) | |
 | POSTTRAN | Core transaction processing job                     |                 |
 | INTCALC  | Run interest calculations                           |                 |
 | TRANBKP  | Backup Transaction database                         |                 |
@@ -297,7 +298,7 @@ Admin users can perform the following functions:
 
 | Job      | Program  | Function                                             | Optional Module |
 |:---------|:---------|:-----------------------------------------------------|:---------------|
-| DUSRSECJ | IEBGENER | Initial Load of User security file                   |                |
+| DUSRSECJ | CBSEC01C, IDCAMS | Initial Load of User security file with generated passwords |                |
 | DEFGDGB  | IDCAMS   | Setup GDG Bases                                      |                |
 | DEFGDGD  | IDCAMS   | Setup more GDG Bases for Db2                         |                |
 | ACCTFILE | IDCAMS   | Refresh Account Master                               |                |

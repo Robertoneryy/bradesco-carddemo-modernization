@@ -26,30 +26,36 @@
 //            DISP=(MOD,DELETE,DELETE)
 //*
 //*-------------------------------------------------------------------*
-//* CREATE USER SECURITY FILE (PS) FROM IN-STREAM DATA
+//* CREATE USER SECURITY FILE (PS) FROM IN-STREAM USER LIST.
+//* CBSEC01C GIVES EVERY USER A NEW RANDOM PASSWORD ON EACH RUN AND
+//* PRINTS IT ONCE IN THIS JOB'S SYSOUT. NO PASSWORDS ARE STORED HERE.
+//* RUN THIS JOB ONLY FOR THE FIRST LOAD; RERUNNING IT REPLACES ALL
+//* USERS AND PASSWORDS.
 //*-------------------------------------------------------------------*
 //*
-//STEP01  EXEC PGM=IEBGENER
+//STEP01  EXEC PGM=CBSEC01C
+//STEPLIB  DD DISP=SHR,
+//         DSN=AWS.M2.CARDDEMO.LOADLIB
 //*
-//SYSUT1   DD *
-ADMIN001MARGARET            GOLD                PASSWORDA
-ADMIN002RUSSELL             RUSSELL             PASSWORDA
-ADMIN003RAYMOND             WHITMORE            PASSWORDA
-ADMIN004EMMANUEL            CASGRAIN            PASSWORDA
-ADMIN005GRANVILLE           LACHAPELLE          PASSWORDA
-USER0001LAWRENCE            THOMAS              PASSWORDU
-USER0002AJITH               KUMAR               PASSWORDU
-USER0003LAURITZ             ALME                PASSWORDU
-USER0004AVERARDO            MAZZI               PASSWORDU
-USER0005LEE                 TING                PASSWORDU
+//USRSEED  DD *
+ADMIN001MARGARET            GOLD                        A
+ADMIN002RUSSELL             RUSSELL                     A
+ADMIN003RAYMOND             WHITMORE                    A
+ADMIN004EMMANUEL            CASGRAIN                    A
+ADMIN005GRANVILLE           LACHAPELLE                  A
+USER0001LAWRENCE            THOMAS                      U
+USER0002AJITH               KUMAR                       U
+USER0003LAURITZ             ALME                        U
+USER0004AVERARDO            MAZZI                       U
+USER0005LEE                 TING                        U
 /*
-//SYSUT2   DD DSN=AWS.M2.CARDDEMO.USRSEC.PS,
+//USRSEC   DD DSN=AWS.M2.CARDDEMO.USRSEC.PS,
 //            DISP=(NEW,CATLG,DELETE),
 //            DCB=(LRECL=80,RECFM=FB,DSORG=PS,BLKSIZE=0),
 //            UNIT=SYSAD,SPACE=(TRK,(10,5),RLSE)
 //*
+//SYSOUT   DD SYSOUT=*
 //SYSPRINT DD SYSOUT=*
-//SYSIN    DD DUMMY
 //*
 //*-------------------------------------------------------------------*
 //* DEFINE VSAM FILE FOR USER SECURITY
@@ -86,6 +92,15 @@ USER0005LEE                 TING                PASSWORDU
 //SYSIN    DD  *
   REPRO INFILE(IN) OUTFILE(OUT)
 /*
+//*
+//*-------------------------------------------------------------------*
+//* DELETE THE WORK COPY SO THE NEW PASSWORDS ARE NOT LEFT IN A PS FILE
+//*-------------------------------------------------------------------*
+//*
+//STEP04  EXEC PGM=IEFBR14,COND=(0,NE)
+//*
+//DD01     DD DSN=AWS.M2.CARDDEMO.USRSEC.PS,
+//            DISP=(OLD,DELETE,KEEP)
 //
 //*
 //* Ver: CardDemo_v1.0-15-g27d6c6f-68 Date: 2022-07-19 23:23:06 CDT
