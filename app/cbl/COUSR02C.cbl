@@ -92,6 +92,11 @@
                PERFORM RETURN-TO-PREV-SCREEN
            ELSE
                MOVE DFHCOMMAREA(1:EIBCALEN) TO CARDDEMO-COMMAREA
+               IF NOT CDEMO-USRTYP-ADMIN
+                   EXEC CICS
+                       XCTL PROGRAM('COSGN00C')
+                   END-EXEC
+               END-IF
                IF NOT CDEMO-PGM-REENTER
                    SET CDEMO-PGM-REENTER    TO TRUE
                    MOVE LOW-VALUES          TO COUSR2AO
