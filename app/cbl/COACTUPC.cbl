@@ -556,6 +556,8 @@
                                                    VALUE 'CCRDSLA'.
           05 LIT-MENUPGM                           PIC X(8)
                                                    VALUE 'COMEN01C'.
+          05 LIT-SIGNONPGM                         PIC X(8)
+                                                   VALUE 'COSGN00C'.
           05 LIT-MENUTRANID                        PIC X(4)
                                                    VALUE 'CM00'.
           05 LIT-MENUMAPSET                        PIC X(7)
@@ -875,11 +877,18 @@
       *****************************************************************
            SET WS-RETURN-MSG-OFF  TO TRUE
       *****************************************************************
-      * Store passed data if  any                *
+      * No COMMAREA means the user has not signed on                  *
       *****************************************************************
            IF EIBCALEN IS EQUAL TO 0
-               OR (CDEMO-FROM-PROGRAM = LIT-MENUPGM
-               AND NOT CDEMO-PGM-REENTER)
+              EXEC CICS XCTL
+                        PROGRAM (LIT-SIGNONPGM)
+              END-EXEC
+           END-IF
+      *****************************************************************
+      * Store passed data if  any                *
+      *****************************************************************
+           IF CDEMO-FROM-PROGRAM = LIT-MENUPGM
+           AND NOT CDEMO-PGM-REENTER
               INITIALIZE CARDDEMO-COMMAREA
                          WS-THIS-PROGCOMMAREA
               SET CDEMO-PGM-ENTER TO TRUE
@@ -890,6 +899,15 @@
               MOVE DFHCOMMAREA(LENGTH OF CARDDEMO-COMMAREA + 1:
                                LENGTH OF WS-THIS-PROGCOMMAREA ) TO
                                 WS-THIS-PROGCOMMAREA
+           END-IF
+      *****************************************************************
+      * Refuse to continue without a signed-on user                   *
+      *****************************************************************
+           IF CDEMO-USER-ID EQUAL LOW-VALUES
+           OR CDEMO-USER-ID EQUAL SPACES
+              EXEC CICS XCTL
+                        PROGRAM (LIT-SIGNONPGM)
+              END-EXEC
            END-IF
       *****************************************************************
       * Remap PFkeys as needed.
