@@ -1,0 +1,56 @@
+name: Java interest calculation (CBACT04C)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "java/**"
+      - "app/cbl/CBACT04C.cbl"
+      - "app/cpy/**"
+      - "app/data/ASCII/**"
+      - ".github/workflows/java-interest-calculation.yml"
+  pull_request:
+    paths:
+      - "java/**"
+      - "app/cbl/CBACT04C.cbl"
+      - "app/cpy/**"
+      - "app/data/ASCII/**"
+      - ".github/workflows/java-interest-calculation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build and run JUnit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Run tests
+        working-directory: java
+        run: mvn -B verify
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: java/target/surefire-reports
+
+  cobol-reference:
+    name: Check expected results against the original COBOL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GnuCOBOL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnucobol3 || sudo apt-get install -y gnucobol
+      - name: Re-run CBACT04C for every test scenario
+        run: java/cobol-reference/generate-expected.sh
+      - name: Expected results must be unchanged
+        run: git diff --exit-code -- java/src/test/resources/scenarios
